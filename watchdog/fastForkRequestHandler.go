@@ -96,6 +96,11 @@ func makeFastForkRequestHandler(config *WatchdogConfig) func(http.ResponseWriter
 				log.Println("read body err", bodyErr)
 			}
 
+			for name, values := range processRes.Header {
+				for _, value := range values {
+					w.Header().Set(name, value)
+				}
+			}
 			w.WriteHeader(processRes.StatusCode)
 			log.Printf("r.len=[%d] processRes.len=[%d] bodyBytes.len=[%d]\n", r.ContentLength, processRes.ContentLength, len(bodyBytes))
 
