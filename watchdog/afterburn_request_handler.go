@@ -96,6 +96,9 @@ func makeAfterburnRequestHandler(config *WatchdogConfig) func(http.ResponseWrite
 				log.Println("read body err", bodyErr)
 			}
 
+			clientHeader := w.Header()
+			copyHeaders(&clientHeader, &processRes.Header)
+
 			w.WriteHeader(processRes.StatusCode)
 			log.Printf("r.len=[%d] processRes.len=[%d] bodyBytes.len=[%d]\n", r.ContentLength, processRes.ContentLength, len(bodyBytes))
 
@@ -116,5 +119,13 @@ func makeAfterburnRequestHandler(config *WatchdogConfig) func(http.ResponseWrite
 		mutex.Unlock()
 
 		// w.Write(bodyBytes)
+	}
+}
+
+func copyHeaders(destination *http.Header, source *http.Header) {
+	for k, vv := range *source {
+		vvClone := make([]string, len(vv))
+		copy(vvClone, vv)
+		(*destination)[k] = vvClone
 	}
 }
