@@ -9,9 +9,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
-	"github.com/alexellis/faas/watchdog/types"
+	"github.com/openfaas/faas/watchdog/types"
 )
 
 func main() {
@@ -51,13 +52,11 @@ func main() {
 
 	http.HandleFunc("/", handler)
 
-	if config.suppressLock == false {
-		path := "/tmp/.lock"
-		log.Printf("Writing lock-file to: %s\n", path)
-		writeErr := ioutil.WriteFile(path, []byte{}, 0660)
-		if writeErr != nil {
-			log.Panicf("Cannot write %s. To disable lock-file set env suppress_lock=true.\n Error: %s.\n", path, writeErr.Error())
-		}
+	path := filepath.Join(os.TempDir(), ".lock")
+	log.Printf("Writing lock-file to: %s\n", path)
+	writeErr := ioutil.WriteFile(path, []byte{}, 0660)
+	if writeErr != nil {
+		log.Panicf("Cannot write %s. To disable lock-file set env suppress_lock=true.\n Error: %s.\n", path, writeErr.Error())
 	}
 	log.Fatal(s.ListenAndServe())
 }

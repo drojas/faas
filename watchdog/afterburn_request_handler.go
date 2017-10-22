@@ -2,13 +2,18 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 func makeAfterburnRequestHandler(config *WatchdogConfig) func(http.ResponseWriter, *http.Request) {
@@ -45,11 +50,23 @@ func makeAfterburnRequestHandler(config *WatchdogConfig) func(http.ResponseWrite
 		log.Println("Process completed running.")
 	}()
 
+	go monitorProcess(process, 1*time.Second)
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		var bodyBytes []byte
 		var wg sync.WaitGroup
 
 		wgCount := 1
+
+		if config.readDebug {
+			fmt.Printf("Header: %s\n", r.Header)
+			reqBody, _ := ioutil.ReadAll(r.Body)
+			defer r.Body.Close()
+
+			r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
+
+			fmt.Printf("Body: %s\n", reqBody)
+		}
 
 		log.Println(">> Lock mutex")
 		mutex.Lock()
@@ -57,15 +74,16 @@ func makeAfterburnRequestHandler(config *WatchdogConfig) func(http.ResponseWrite
 		wg.Add(wgCount)
 
 		go func(p *exec.Cmd) {
-			log.Println("Writing to pipe", p)
+			log.Println("Writing to process pipe")
 
 			r.Write(*writePipe)
-			log.Println("Writing to pipe 2")
+			log.Println("Written to process pipe")
 
 			defer wg.Done()
 		}(process)
+
 		wg.Wait()
-		log.Println("Waited")
+		log.Println("Synchronizing")
 
 		wg.Add(wgCount)
 
@@ -108,17 +126,44 @@ func makeAfterburnRequestHandler(config *WatchdogConfig) func(http.ResponseWrite
 			if writeErr != nil {
 				log.Println(writeErr)
 			}
+			if config.writeDebug {
+				fmt.Printf("Response: %s", string(bodyBytes))
+			}
+
 			// defer processRes.Body.Close()
 			defer wg.Done()
 		}()
+
 		log.Println("Waiting again")
 		wg.Wait()
-		log.Println("Waiting again done")
 
 		log.Println("<< Unlock mutex")
 		mutex.Unlock()
+		log.Println(">> Mutex unlocked")
 
 		// w.Write(bodyBytes)
+	}
+}
+
+// monitorProcess monitors the child process and removes the lock file if the
+// process dies. This causes the scheduler to restart the container
+func monitorProcess(childProcess *exec.Cmd, tickerDuration time.Duration) {
+	healthChecker := time.NewTicker(tickerDuration)
+	for range healthChecker.C {
+		// log.Println("Checking process health")
+		if childProcess != nil && childProcess.ProcessState != nil && childProcess.ProcessState.Exited() {
+
+			log.Printf("Process died, removing .lock file.\n")
+
+			path := filepath.Join(os.TempDir(), ".lock")
+			removeErr := os.Remove(path)
+
+			if removeErr != nil {
+				log.Printf("Error removing lock-file %s", removeErr)
+			}
+			healthChecker.Stop()
+			return
+		}
 	}
 }
 

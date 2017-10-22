@@ -4,6 +4,10 @@
 
 ## Kubernetes
 
+OpenFaaS is Kubernetes-native and uses *Deployments* and *Services*. For more detail check out the ["faas-netes" repository](https://github.com/openfaas/faas-netes).
+
+> For deploying on a cloud that supports Kubernetes *LoadBalancers* you may also want to apply the configuration in: `cloud/lb.yml`.
+
 ### Build a cluster
 
 You can start evaluating FaaS and building functions on your laptop or on a VM (cloud or on-prem).
@@ -88,3 +92,22 @@ You can also use the CLI like this:
 $ echo -n "" | faas-cli invoke --gateway http://kubernetes-ip:31112 --name nodeinfo
 $ echo -n "verbose" | faas-cli invoke --gateway http://kubernetes-ip:31112 --name nodeinfo
 ```
+
+## Asynchronous functions
+
+Asynchronous invocation works by queuing requests with NATS Streaminig.
+
+Deploy the asynchronous stack like this:
+
+```
+$ cd faas-netes
+$ kubectl apply -f ./faas.async.yml,nats.yml,monitoring.yml,rbac.yml
+```
+
+* See also: [Asynchronous function guide](https://github.com/openfaas/faas/blob/master/guide/asynchronous.md)
+
+## Helm chart
+
+A Helm chart is provided below with experimental support.
+
+* [OpenFaaS Helm chart](https://github.com/openfaas/faas-netes/blob/master/HELM.md)

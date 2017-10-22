@@ -20,7 +20,7 @@ We have a number of areas where we can accept contributions:
 
 **I've found a typo**
 
-* A Pull Request is not necessary. Raise an [Issue](https://github.com/alexellis/faas/issues) and we'll fix it as soon as we can. 
+* A Pull Request is not necessary. Raise an [Issue](https://github.com/openfaas/faas/issues) and we'll fix it as soon as we can. 
 
 **I have a [great] idea**
 
@@ -42,7 +42,11 @@ Please read this whole guide and make sure you agree to our DCO agreement (inclu
 * Complete the whole template for issues and pull requests
 * [Reference addressed issues](https://help.github.com/articles/closing-issues-using-keywords/) in the PR description & commit messages - use 'Fixes #IssueNo' 
 * Always give instructions for testing
-* Give us CLI commands and output or screenshots where you can 
+* Provide us CLI commands and output or screenshots where you can 
+
+**Unit testing with Golang**
+
+Please follow style guide on [this blog post](https://blog.alexellis.io/golang-writing-unit-tests/) from [The Go Programming Language](https://www.amazon.co.uk/Programming-Language-Addison-Wesley-Professional-Computing/dp/0134190440)
 
 **I have a question, a suggestion or need help**
 
@@ -72,11 +76,11 @@ This project is written in Golang but many of the community contributions so far
 
 #### Community file
 
-The [community.md](https://github.com/alexellis/faas/blob/master/community.md) file highlights blogs, talks and code repos with example FaaS functions and usages. Please send a Pull Request if you are doing something cool with FaaS.
+The [community.md](https://github.com/openfaas/faas/blob/master/community.md) file highlights blogs, talks and code repos with example FaaS functions and usages. Please send a Pull Request if you are doing something cool with FaaS.
 
 #### Roadmap
 
-Checkout the [roadmap](https://github.com/alexellis/faas/blob/master/ROADMAP.md) and [open issues](https://github.com/alexellis/faas/issues).
+Checkout the [roadmap](https://github.com/openfaas/faas/blob/master/ROADMAP.md) and [open issues](https://github.com/openfaas/faas/issues).
 
 #### Slack
 
@@ -89,6 +93,8 @@ Email: alex@openfaas.com - please send in a one-liner about yourself so we can g
 This project is licensed under the MIT License.
 
 #### Sign your work
+
+> Note: all of the commits in your PR/Patch must be signed-off.
 
 The sign-off is a simple line at the end of the explanation for a patch. Your
 signature certifies that you wrote the patch or otherwise have the right to pass
